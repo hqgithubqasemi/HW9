@@ -1,0 +1,78 @@
+---
+title: "HW9"
+author: "Humayun Qasemi"
+date: "4/10/2021"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r libraries}
+library(tidyverse)
+library(shiny)
+library(ggplot2)
+library(tidycensus)
+```
+
+
+```{r Q1}
+census_api_key("ec269661e7e299597f0981056e20642cf3b4a748")
+install = TRUE
+
+Var1 <- load_variables(2015, "acs5", cache = TRUE)
+Var1
+
+
+```
+```{r Q2}
+###Q2-a
+
+CAincome <- get_acs(geography = "county",
+                    variables = c(medincome = "B01001A_011"),
+                    state = "CA",
+                    year = 2015)
+CAincome
+is_tibble(CAincome)
+
+###Q2-b
+
+CAincome%>%
+  filter(estimate >30000)%>%
+  arrange(desc(estimate)) -> CAEstimate
+
+CAEstimate
+
+###Q2-c
+
+CAEstimate%>%
+ filter(estimate == 51644, moe ==667) -> CA1
+CA1
+
+###Q2-d
+
+plot <- ggplot(CAEstimate, aes(x=estimate))+
+  geom_boxplot(fill = "red")
+plot
+
+###Q2-e
+
+CAEstimate %>%
+  mutate(NAME = gsub(" County, California", "", NAME)) %>%
+  ggplot(aes(x = estimate, y = reorder(NAME, estimate))) +
+  geom_errorbarh(aes(xmin = estimate - moe, xmax = estimate + moe)) +
+  geom_point(color = "blue", size = 3) +
+  labs(title = "Median Income for White Males by County",
+       subtitle = "2014-2018 American Community Survey",
+       y = "",
+       x = "ACS estimate (bars represent margin of error)")
+
+```
+
